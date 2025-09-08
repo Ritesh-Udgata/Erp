@@ -1,13 +1,16 @@
+import { type FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, FileImage } from "lucide-react";
 import { useAuth } from "@/hooks/Auth";
+import { type AuthState } from "@/../../lib/src/types/auth";
 import ProfileImageUploader from "@/components/shared/ProfileImageUploader";
 import SignatureUploader from "@/components/profile/SignatureUploader";
+import SocialAcademicProfile from "@/components/profile/SocialAcademicProfile";
 
-const Profile = () => {
+const Profile: FC = () => {
   const { authState } = useAuth();
-  const userEmail = authState!.email;
-  const userType = authState!.userType;
+  const userEmail = authState?.email ?? '';
+  const userType = authState?.userType ?? '';
 
   return (
     <div className="max-w-2xl space-y-4 p-2">
@@ -25,6 +28,8 @@ const Profile = () => {
           <ProfileImageUploader email={userEmail} />
         </CardContent>
       </Card>
+
+      <SocialAcademicProfile />
 
       {userType === "faculty" && (
         <Card>
