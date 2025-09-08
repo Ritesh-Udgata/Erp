@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
+import { useEffect } from "react";
 
 const socialProfileSchema = z.object({
   linkedin: z.string().url("Please enter a valid LinkedIn URL").optional().or(z.literal("")),
@@ -39,6 +40,17 @@ const SocialAcademicProfile = () => {
       googleScholar: profileData?.googleScholar || "",
     },
   });
+
+  useEffect(() => {
+    if (profileData) {
+      form.reset({
+        linkedin: profileData.linkedin || "",
+        orchidID: profileData.orchidID || "",
+        scopusID: profileData.scopusID || "",
+        googleScholar: profileData.googleScholar || "",
+      });
+    }
+  }, [profileData, form]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: SocialProfileFormData) => {
@@ -135,9 +147,9 @@ const SocialAcademicProfile = () => {
             <Button 
               type="submit" 
               className="w-full"
-              disabled={updateProfileMutation.isLoading}
+              disabled={updateProfileMutation.isPending}
             >
-              {updateProfileMutation.isLoading ? "Updating..." : "Save Changes"}
+              {updateProfileMutation.isPending ? "Updating..." : "Save Changes"}
             </Button>
           </form>
         </Form>
