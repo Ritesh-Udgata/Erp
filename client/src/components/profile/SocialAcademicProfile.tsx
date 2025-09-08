@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, GraduationCap } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -6,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
@@ -21,7 +20,6 @@ const socialProfileSchema = z.object({
 type SocialProfileFormData = z.infer<typeof socialProfileSchema>;
 
 const SocialAcademicProfile = () => {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: profileData, isLoading } = useQuery({
@@ -47,18 +45,11 @@ const SocialAcademicProfile = () => {
       return api.put("/profile/edit", data);
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Social/academic profile updated successfully",
-      });
+      toast.success("Social/academic profile updated successfully");
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
+    onError: () => {
+      toast.error("Failed to update profile. Please try again.");
     },
   });
 
@@ -144,9 +135,9 @@ const SocialAcademicProfile = () => {
             <Button 
               type="submit" 
               className="w-full"
-              disabled={updateProfileMutation.isPending}
+              disabled={updateProfileMutation.isLoading}
             >
-              {updateProfileMutation.isPending ? "Updating..." : "Save Changes"}
+              {updateProfileMutation.isLoading ? "Updating..." : "Save Changes"}
             </Button>
           </form>
         </Form>

@@ -2,7 +2,6 @@ import { type FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, FileImage } from "lucide-react";
 import { useAuth } from "@/hooks/Auth";
-import { type AuthState } from "@/../../lib/src/types/auth";
 import ProfileImageUploader from "@/components/shared/ProfileImageUploader";
 import SignatureUploader from "@/components/profile/SignatureUploader";
 import SocialAcademicProfile from "@/components/profile/SocialAcademicProfile";
