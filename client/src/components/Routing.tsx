@@ -12,6 +12,7 @@ import FacultyReview from "@/views/QpReview/FacultyReview/[course]";
 import ReviewPage from "@/views/QpReview/FacultyReview";
 import PhdLayout from "@/layouts/Phd";
 import { allPermissions, permissions } from "lib";
+import ExaminerAssignments from "@/views/Phd/Examiner/Assignments";
 import {
   BookOpen,
   Computer,
@@ -20,6 +21,7 @@ import {
   LibraryBig,
   Warehouse,
   File,
+  ChartNoAxesCombined,
 } from "lucide-react";
 import {
   BrowserRouter,
@@ -28,6 +30,12 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
+import { Calendar } from "lucide-react";
+import MeetingLayout from "@/layouts/MeetingLayout";
+import MeetingDashboardView from "@/views/Meeting/MeetingDashboardView";
+import CreateMeeting from "@/views/Meeting/CreateMeeting";
+import ViewMeeting from "@/views/Meeting/ViewMeeting";
+import RespondToInvite from "@/views/Meeting/RespondToInvite";
 import UpdateSemesterDates from "@/views/Phd/Staff/UpdateSemesterDates";
 import UpdateDeadlinesPage from "@/views/Phd/Staff/UpdateDeadlines";
 import UpdateSubAreasPage from "@/views/Phd/Staff/UpdateSubAreas";
@@ -35,13 +43,13 @@ import ManageEmailTemplates from "@/views/Phd/Staff/ManageEmailTemplates";
 import QualifyingExams from "@/views/Phd/Student/QualifyingExams";
 import QualifyingExamManagement from "@/views/Phd/DrcConvenor/QualifyingExamManagement";
 import DrcProposalManagement from "@/views/Phd/DrcConvenor/ProposalManagement";
+import DrcViewProposal from "@/views/Phd/DrcConvenor/ViewProposal";
 import DacProposalManagement from "@/views/Phd/DacMember/ProposalManagement";
+import DacViewProposal from "@/views/Phd/DacMember/ViewProposal";
 import ExaminerSuggestions from "@/views/Phd/Supervisor/ExaminerSuggestions";
 import Proposal from "@/views/Phd/Student/Proposal";
 import SupervisorProposal from "@/views/Phd/Supervisor/Proposal";
 import SupervisorViewProposal from "@/views/Phd/Supervisor/ViewProposal";
-import CoSupervisorProposal from "@/views/Phd/CoSupervisor/Proposal";
-import CoSupervisorViewProposal from "@/views/Phd/CoSupervisor/ViewProposal";
 import NotFoundPage from "@/layouts/404";
 import ConferenceLayout from "@/layouts/Conference";
 import ConferenceApplyView from "@/views/Conference/Apply";
@@ -61,6 +69,7 @@ import PublicationsLayout from "@/layouts/Publications";
 import YourPublications from "@/views/Publications/YourPublications";
 import AllPublications from "@/views/Publications/AllPublications";
 import EditPublications from "@/views/Publications/EditPublications";
+import UploadReseargence from "@/views/Publications/UploadReseargence";
 import InventoryLayout from "@/layouts/Inventory";
 import Settings from "@/views/Inventory/Settings";
 import { ItemsView } from "@/views/Inventory/ItemsView";
@@ -69,6 +78,7 @@ import BulkAddView from "@/views/Inventory/BulkAddView";
 import Stats from "@/views/Inventory/Stats";
 import ProfilePage from "@/views/Profile/ProfilePage";
 import ContributorsPage from "@/views/Contributors";
+import HelpPage from "@/views/Wiki";
 import ProjectLayout from "@/layouts/Project";
 import AddProject from "@/views/Project/AddProject";
 import ProjectDetails from "@/views/Project/[id]";
@@ -88,6 +98,8 @@ import BulkUploadWilp from "@/views/Wilp/BulkUploadWilp";
 import WilpProjectDetails from "@/views/Wilp/[id]";
 import Statistics from "@/views/Wilp/Stats";
 import SendMail from "@/views/Wilp/SendMail";
+import AnalyticsLayout from "@/layouts/Analytics";
+import PublicationsAnalytics from "@/views/Analytics/Publications";
 
 const adminModulePermissions = [
   permissions["/admin/member/search"],
@@ -120,6 +132,11 @@ const patentModulePermissions: string[] = Object.keys(allPermissions).filter(
 );
 const wilpModulePermissions: string[] = Object.keys(allPermissions).filter(
   (permission) => permission.startsWith("wilp:")
+);
+const meetingModulePermissions: string[] = Object.keys(allPermissions).filter(
+  (permission) => permission.startsWith("meeting:")
+);const analyticsModulePermissions: string[] = Object.keys(allPermissions).filter(
+  (permission) => permission.startsWith("analytics:")
 );
 
 const Routing = () => {
@@ -185,6 +202,18 @@ const Routing = () => {
       url: "/wilp",
       requiredPermissions: wilpModulePermissions,
     },
+    {
+      title: "Meeting",
+      icon: <Calendar />,
+      url: "/meeting",
+      requiredPermissions: meetingModulePermissions,
+    },
+    {
+      title: "Analytics",
+      icon: <ChartNoAxesCombined />,
+      url: "/analytics",
+      requiredPermissions: analyticsModulePermissions,
+    },
   ];
 
   return (
@@ -206,6 +235,10 @@ const Routing = () => {
           }
         />
         <Route path="/contributors" element={<ContributorsPage />} />
+        <Route
+          path="/help"
+          element={authState ? <HelpPage /> : <Navigate to="/" replace />}
+        />
         {!authState && <Route path="*" element={<Navigate to="/" />} />}
         {authState && <Route path="/profile" element={<ProfilePage />} />}
         {checkAccessAnyOne(adminModulePermissions) && (
@@ -255,6 +288,14 @@ const Routing = () => {
                 />
               </>
             )}
+          </Route>
+        )}
+        {checkAccessAnyOne(meetingModulePermissions) && (
+          <Route path="/meeting" element={<MeetingLayout />}>
+            <Route index element={<MeetingDashboardView />} />
+            <Route path="create" element={<CreateMeeting />} />
+            <Route path="view/:id" element={<ViewMeeting />} />
+            <Route path="respond/:id" element={<RespondToInvite />} />
           </Route>
         )}
         {checkAccessAnyOne(qpReviewModulePermissions) && (
@@ -368,7 +409,6 @@ const Routing = () => {
               </Route>
             )}
 
-            {/* DRC Convenor */}
             {checkAccessAnyOne([
               permissions["/phd/drcMember/getAvailableExams"],
               permissions["/phd/proposal/drcConvener/getProposals"],
@@ -385,24 +425,27 @@ const Routing = () => {
                 {checkAccess(
                   permissions["/phd/proposal/drcConvener/getProposals"]
                 ) && (
-                  <Route
-                    path="proposal-management"
-                    element={<DrcProposalManagement />}
-                  />
+                  <>
+                    <Route
+                      path="proposal-management"
+                      element={<DrcProposalManagement />}
+                    />
+                    <Route
+                      path="proposal-management/:id"
+                      element={<DrcViewProposal />}
+                    />
+                  </>
                 )}
               </Route>
             )}
-
-            {/* DAC Member */}
             {checkAccess(
               permissions["/phd/proposal/dacMember/getProposals"]
             ) && (
               <Route path="dac" element={<Outlet />}>
                 <Route path="proposals" element={<DacProposalManagement />} />
+                <Route path="proposals/:id" element={<DacViewProposal />} />
               </Route>
             )}
-
-            {/* Supervisor */}
             {checkAccessAnyOne([
               permissions["/phd/proposal/supervisor/getProposals"],
               permissions["/phd/supervisor/suggestExaminers"],
@@ -429,17 +472,9 @@ const Routing = () => {
                 )}
               </Route>
             )}
-
-            {/* Co-Supervisor */}
-            {checkAccess(
-              permissions["/phd/proposal/coSupervisor/getProposals"]
-            ) && (
-              <Route path="coSupervisor" element={<Outlet />}>
-                <Route path="proposals" element={<CoSupervisorProposal />} />
-                <Route
-                  path="proposal/:id"
-                  element={<CoSupervisorViewProposal />}
-                />
+            {checkAccess(permissions["/phd/examiner/assignments"]) && (
+              <Route path="examiner" element={<Outlet />}>
+                <Route path="assignments" element={<ExaminerAssignments />} />
               </Route>
             )}
           </Route>
@@ -455,6 +490,12 @@ const Routing = () => {
             <Route path="your-publications" element={<YourPublications />} />
             {checkAccess(permissions["/publications/all"]) && (
               <Route path="all-publications" element={<AllPublications />} />
+            )}
+            {checkAccess(permissions["/publications/upload"]) && (
+              <Route
+                path="upload-researgence"
+                element={<UploadReseargence />}
+              />
             )}
             {checkAccess(permissions["/publications/all"]) && (
               <Route path="edit-publications" element={<EditPublications />} />
@@ -582,6 +623,22 @@ const Routing = () => {
               <Route path="view-stats" element={<Statistics />} />
             )}
             <Route path=":id" element={<WilpProjectDetails />} />
+          </Route>
+        )}
+        {checkAccessAnyOne(analyticsModulePermissions) && (
+          <Route path="/analytics" element={<AnalyticsLayout />}>
+            <Route
+              index
+              element={<Navigate to="/analytics/publications" replace={true} />}
+            />
+            {checkAccess(permissions["/analytics/publications"]) && (
+              <>
+                <Route
+                  path="publications"
+                  element={<PublicationsAnalytics />}
+                />
+              </>
+            )}
           </Route>
         )}
         <Route path="*" element={<NotFoundPage />} />
